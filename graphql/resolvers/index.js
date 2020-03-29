@@ -16,15 +16,32 @@ export const resolvers = {
     Query: {
         covid: () => {
             return 'hello';
+        },
+        countryStats: (obj) =>{
+            return obj
         }
+
     },
     Subscription: {
         subscribe2covid: {
             resolve: (payload) => {
-                console.log(payload)
-                return {}
+                if (payload.features){
+
+                   const result = payload.features.slice(0,20).map((item)=>{
+                        return {
+                            country: `${item.attributes.Country_Region}`,
+                            confirmedDeaths: `${item.attributes.Deaths}`,
+                            confirmedCases:`${item.attributes.Confirmed}`,
+                            recovered:`${item.attributes.Recovered}`
+
+                       }
+                    })
+                    console.log('This is the result ',result)    
+                    return result
+                }
+                return []
             },
-            subscribe: (_, args) => pubsub.asyncIterator(['jhu/csse/covid19/raw'])
+            subscribe: (_, args) => pubsub.asyncIterator('jhu/csse/covid19/raw')
         }
     }
 }
