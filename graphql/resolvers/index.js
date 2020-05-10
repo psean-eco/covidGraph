@@ -1,6 +1,8 @@
+
 import { MQTTPubSub } from 'graphql-mqtt-subscriptions'
 import { connect } from 'mqtt'
-
+import {countryDataSubscriptionResolver} from './countryDataSubscriptionResolver'
+import {countryStatsResolver} from './countryStatsResolver'
 //not secrets
 const clientConnObj = {
   username: 'covid-public-client',
@@ -16,26 +18,11 @@ const pubsub = new MQTTPubSub({
 
 export const resolvers = {
   Query: {
-    countryStats: obj => {
-      return obj
-    },
+    countryStats: countryStatsResolver,
   },
   Subscription: {
     countryDataSubscription: {
-      resolve: payload => {
-        if (payload.features) {
-          const result = payload.features.map(item => {
-            return {
-              country: `${item.attributes.Country_Region}`,
-              confirmedDeaths: `${item.attributes.Deaths}`,
-              confirmedCases: `${item.attributes.Confirmed}`,
-              recovered: `${item.attributes.Recovered}`,
-            }
-          })
-          return result
-        }
-        return []
-      },
+      resolve:countryDataSubscriptionResolver,
       subscribe: (_, args) => pubsub.asyncIterator(RAW_DATA_TOPIC),
     },
   },
